@@ -3,7 +3,11 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     project_id: str | None = None
+
     otel_exporter_otlp_endpoint: str | None = None
+    # WARNING: 本番環境ではセキュリティ設定を検討する必要があります
+    otel_exporter_otlp_insecure: bool = False
+
     log_level: str = "INFO"
     environment: str = "dev"
     api_host: str = "localhost"

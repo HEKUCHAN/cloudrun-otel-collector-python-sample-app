@@ -12,7 +12,7 @@ def setup_tracing():
     if settings.otel_exporter_otlp_endpoint:
         exporter = OTLPSpanExporter(
             endpoint=settings.otel_exporter_otlp_endpoint,
-            insecure=True,  # warning: 本番環境ではセキュリティ設定を検討してください
+            insecure=settings.otel_exporter_otlp_insecure,
         )
 
     provider = TracerProvider()

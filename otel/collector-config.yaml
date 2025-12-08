@@ -4,6 +4,10 @@ receivers:
       grpc:
       http:
 
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
 processors:
   batch:
     send_batch_size: 1024
@@ -17,34 +21,35 @@ processors:
   resource:
     attributes:
       - key: service.name
-        value: ${SERVICE_NAME:-fastapi-todo-service}
+        value: fastapi-todo-service
         action: upsert
       - key: service.namespace
-        value: ${SERVICE_NAMESPACE:-demo}
+        value: demo  # TODO: 必要に応じて名前空間を変更
         action: upsert
       - key: deployment.environment
-        value: ${ENVIRONMENT:-dev}
+        value: dev   # TODO: 必要に応じて環境名を変更（dev/staging/prod等）
         action: upsert
 
 exporters:
   googlecloud: {}
 
-  logging:
+  debug:
     verbosity: normal
 
 service:
+  extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [googlecloud, logging]
+      exporters: [googlecloud, debug]
 
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [googlecloud, logging]
+      exporters: [googlecloud, debug]
 
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [googlecloud, logging]
+      exporters: [googlecloud, debug]

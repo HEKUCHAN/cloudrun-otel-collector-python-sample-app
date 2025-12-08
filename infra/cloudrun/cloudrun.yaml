@@ -1,0 +1,51 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: fastapi-todo
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/container-dependencies: "{app:[collector]}"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containers:
+        - name: app
+          # TODO: このサービス用にビルドしたアプリのコンテナイメージに変更する
+          image: APP_IMAGE
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://localhost:4317"
+            - name: OTEL_EXPORTER_OTLP_INSECURE
+              value: "true"
+            - name: ENVIRONMENT
+              value: "dev"
+            - name: SERVICE_NAME
+              value: "fastapi-todo-service"
+
+        - name: collector
+          image: "us-docker.pkg.dev/cloud-ops-agents-artifacts/google-cloud-opentelemetry-collector/otelcol-google:0.137.0"
+          args:
+            - --config=/etc/otelcol-google/config.yaml
+          volumeMounts:
+            - mountPath: /etc/otelcol-google
+              name: collector-config
+          startupProbe:
+            httpGet:
+              path: /
+              port: 13133
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 10
+
+      volumes:
+        - name: collector-config
+          secret:
+            # TODO: Collector用config設定を格納した Secret の名前に変更する
+            secretName: OTEL_COLLECTOR_CONFIG
+            items:
+              - key: latest
+                path: config.yaml
