@@ -13,7 +13,7 @@ def list_todo():
 
 @router.post("/")
 def create_todo(todo: Todo):
-    add(todo.dict())
+    add(todo.model_dump())
     return todo
 
 
