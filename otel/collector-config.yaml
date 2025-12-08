@@ -1,0 +1,50 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 75
+    spike_limit_percentage: 10
+
+  resource:
+    attributes:
+      - key: service.name
+        value: ${SERVICE_NAME:-fastapi-todo-service}
+        action: upsert
+      - key: service.namespace
+        value: ${SERVICE_NAMESPACE:-demo}
+        action: upsert
+      - key: deployment.environment
+        value: ${ENVIRONMENT:-dev}
+        action: upsert
+
+exporters:
+  googlecloud: {}
+
+  logging:
+    verbosity: normal
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [googlecloud, logging]
+
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [googlecloud, logging]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [googlecloud, logging]
