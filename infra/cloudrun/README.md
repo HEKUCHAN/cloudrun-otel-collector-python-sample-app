@@ -4,8 +4,6 @@
 
 この Cloud Run manifest は、Google が提供している OpenTelemetry Collector（sidecar）を利用する構成になっています。公開している `cloudrun.yaml` はサンプルファイルになっているので、適宜必要なものを更新してください。
 
----
-
 # 使用方法
 
 ## 1. yamlファイルの不足部分を修正
@@ -55,31 +53,16 @@ cp cloudrun.yaml cloudrun-deploy.yaml
                 path: config.yaml
 ```
 
-重要な修正点:
+手動で修正が必要な箇所:
 - `APP_IMAGE`: 自分でビルド・push したアプリケーションのコンテナイメージ名
 - `OTEL_COLLECTOR_CONFIG`: OpenTelemetry Collector の設定ファイルを格納した Secret の名前
 - `PORT` 環境変数: Cloud Run が自動設定するため削除
 - `startupProbe`: collector コンテナに必須（ポート 13133 でヘルスチェック）
 
-## 2. Collector 設定ファイルの準備
+## 2. Secret Manager に Collector の設定を登録する
 
-Collector の設定ファイル（`${PROJECT_ROOT}/otel/collector-config.yaml`）をデプロイ用に準備します。
-サンプルファイルには環境変数のデフォルト値構文 `${VAR:-default}` が含まれていますが、Cloud Run の Collector では使用できないため、固定値に置き換えたファイルを作成します。
-
-```bash
-cp ../../otel/collector-config.yaml ../../otel/collector-config-deploy.yaml
-```
-
-`collector-config-deploy.yaml` を編集:
-- 環境変数のデフォルト値構文（例: `${SERVICE_NAME:-fastapi-todo-service}`）を固定値（例: `fastapi-todo-service`）に変更
-- `logging` exporter を `debug` exporter に変更（非推奨のため）
-- `health_check` extension を追加（ポート 13133 でヘルスチェックを有効化）
-
-詳細は `${PROJECT_ROOT}/otel/collector-config.yaml` のコメントを参照してください。
-
-## 3. Secret Manager に Collector の設定を登録する
-
-準備した設定ファイルを Secret Manager に登録します。
+Collector の設定ファイル（`${PROJECT_ROOT}/otel/collector-config.yaml`）を Secret Manager に登録します。
+このファイルは Cloud Run で動作するように必要な設定（health_check extension、debug exporter等）が既に含まれています。
 
 ```bash
 gcloud secrets create otel-collector-config \
@@ -87,12 +70,12 @@ gcloud secrets create otel-collector-config \
   --project=<PROJECT_ID>
 
 gcloud secrets versions add otel-collector-config \
-  --data-file=../../otel/collector-config-deploy.yaml \
+  --data-file=../../otel/collector-config.yaml \
   --project=<PROJECT_ID>
 ```
 
 設定ファイルを更新した場合は、`gcloud secrets versions add ...` のコマンドだけ再実行すれば、最新バージョンとして登録されます。
-`cloudrun.yaml` の `secretName` に指定した名前(例: `otel-collector-config`)と一致している必要があります。
+`cloudrun-deploy.yaml` の `secretName` に指定した名前(例: `otel-collector-config`)と一致している必要があります。
 
 ### Secret へのアクセス権限を付与
 
@@ -114,7 +97,7 @@ gcloud projects describe <PROJECT_ID> --format="value(projectNumber)"
 ## 4. Docker イメージを Artifact Registry に push する
 
 FastAPI のアプリケーションをビルドし、Artifact Registry に push します。
-イメージ名は `cloudrun.yaml` の `image: APP_IMAGE` と同じものを指定してください。
+イメージ名は `cloudrun-deploy.yaml` の `image: APP_IMAGE` と同じものを指定してください。
 
 まず、Artifact Registry のリポジトリを作成します(初回のみ):
 
