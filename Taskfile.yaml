@@ -34,7 +34,7 @@ tasks:
   todo:list:
     desc: "GET /todos"
     cmds:
-      - curl -s http://${API_HOST}:${API_PORT}/todos | jq .
+      - curl -s http://${API_HOST}:${API_PORT}/todos/ | jq .
 
 
   todo:create:
@@ -45,7 +45,7 @@ tasks:
       done:  '{{.done | default false}}'
     cmds:
       - |
-        curl -s -X POST http://${API_HOST}:${API_PORT}/todos \
+        curl -s -X POST http://${API_HOST}:${API_PORT}/todos/ \
         -H "Content-Type: application/json" \
         -d "{\"id\":{{.id}},\"title\":\"{{.title}}\",\"done\":{{.done}}}" \
         | jq .
