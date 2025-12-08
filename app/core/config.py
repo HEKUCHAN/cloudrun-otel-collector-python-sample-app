@@ -6,6 +6,12 @@ class Settings(BaseSettings):
     otel_exporter_otlp_endpoint: str | None = None
     log_level: str = "INFO"
     environment: str = "dev"
+    api_host: str = "localhost"
+    api_port: int = 8000
+
+    @property
+    def api_base_url(self) -> str:
+        return f"http://{self.api_host}:{self.api_port}"
 
     def is_production(self) -> bool:
         return (
