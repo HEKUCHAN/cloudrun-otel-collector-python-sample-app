@@ -28,22 +28,6 @@ cp cloudrun.yaml cloudrun-deploy.yaml
             # PORT環境変数は削除（Cloud Runが自動設定）
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
 ...
-        - name: collector
-          image: "us-docker.pkg.dev/cloud-ops-agents-artifacts/google-cloud-opentelemetry-collector/otelcol-google:0.137.0"
-          args:
-            - --config=/etc/otelcol-google/config.yaml
-          volumeMounts:
-            - mountPath: /etc/otelcol-google
-              name: collector-config
-          startupProbe:  # TODO: startupProbeを追加（必須）
-            httpGet:
-              path: /
-              port: 13133
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 10
-...
       volumes:
         - name: collector-config
           secret:
@@ -57,7 +41,6 @@ cp cloudrun.yaml cloudrun-deploy.yaml
 - `APP_IMAGE`: 自分でビルド・push したアプリケーションのコンテナイメージ名
 - `OTEL_COLLECTOR_CONFIG`: OpenTelemetry Collector の設定ファイルを格納した Secret の名前
 - `PORT` 環境変数: Cloud Run が自動設定するため削除
-- `startupProbe`: collector コンテナに必須（ポート 13133 でヘルスチェック）
 
 ## 2. Secret Manager に Collector の設定を登録する
 
