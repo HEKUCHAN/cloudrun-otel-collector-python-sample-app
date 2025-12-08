@@ -52,22 +52,22 @@ tasks:
 
 
   todo:update:
-    desc: "PATCH /todos/{id}"
+    desc: "PATCH /todos/{id} (usage: task todo:update id=1 DATA='{\"title\":\"hello\",\"done\":true}')"
     vars:
-      id:   '{{.id | default 1}}'
-      done: '{{.done | default true}}'
+      id: '{{.id | default "1"}}'
     cmds:
       - |
+        DATA='{{.DATA | default "{\"done\":true}"}}'
         curl -s -X PATCH http://${API_HOST}:${API_PORT}/todos/{{.id}} \
         -H "Content-Type: application/json" \
-        -d "{\"done\": {{.done}} }" \
+        -d "$DATA" \
         | jq .
 
 
   todo:delete:
-    desc: "DELETE /todos/{id}"
+    desc: "DELETE /todos/{id} (usage: task todo:delete id=1)"
     vars:
-      id: '{{.id | default 1}}'
+      id: '{{.id | default "1"}}'
     cmds:
       - |
         curl -s -X DELETE http://${API_HOST}:${API_PORT}/todos/{{.id}} \
