@@ -4,7 +4,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import \
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.semconv.resource import ResourceAttributes
+from opentelemetry.semconv.attributes import service_attributes
 
 from app.core.config import settings
 
@@ -35,8 +35,8 @@ def setup_tracing():
     # リソース情報を設定してスパンのコンテキストを明確化
     resource = Resource.create(
         {
-            ResourceAttributes.SERVICE_NAME: settings.service_name or "fastapi-todo-service",
-            ResourceAttributes.SERVICE_VERSION: _get_version(),
+            service_attributes.SERVICE_NAME: settings.service_name or "fastapi-todo-service",
+            service_attributes.SERVICE_VERSION: _get_version(),
         }
     )
 
