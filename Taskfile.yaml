@@ -3,6 +3,7 @@ version: "3"
 env:
   API_HOST: "localhost"
   API_PORT: "8000"
+  API_BASE_URL: '{{.API_BASE_URL | default "http://localhost:8000"}}'
 
 tasks:
   # Server
@@ -22,7 +23,7 @@ tasks:
   health:
     desc: "GET /"
     cmds:
-      - curl -s http://${API_HOST}:${API_PORT} | jq .
+      - curl -s ${API_BASE_URL} | jq .
 
   otel:
     desc: "OTEL endpoint 確認"
@@ -34,8 +35,7 @@ tasks:
   todo:list:
     desc: "GET /todos"
     cmds:
-      - curl -s http://${API_HOST}:${API_PORT}/todos/ | jq .
-
+      - curl -s ${API_BASE_URL}/todos/ | jq .
 
   todo:create:
     desc: "POST /todos (id=?, title=?, done=?)"
@@ -45,11 +45,10 @@ tasks:
       done:  '{{.done | default false}}'
     cmds:
       - |
-        curl -s -X POST http://${API_HOST}:${API_PORT}/todos/ \
+        curl -s -X POST ${API_BASE_URL}/todos/ \
         -H "Content-Type: application/json" \
         -d "{\"id\":{{.id}},\"title\":\"{{.title}}\",\"done\":{{.done}}}" \
         | jq .
-
 
   todo:update:
     desc: "PATCH /todos/{id} (usage: task todo:update id=1 DATA='{\"title\":\"hello\",\"done\":true}')"
@@ -58,11 +57,10 @@ tasks:
     cmds:
       - |
         DATA='{{.DATA | default "{\"done\":true}"}}'
-        curl -s -X PATCH http://${API_HOST}:${API_PORT}/todos/{{.id}} \
+        curl -s -X PATCH ${API_BASE_URL}/todos/{{.id}} \
         -H "Content-Type: application/json" \
         -d "$DATA" \
         | jq .
-
 
   todo:delete:
     desc: "DELETE /todos/{id} (usage: task todo:delete id=1)"
@@ -70,5 +68,5 @@ tasks:
       id: '{{.id | default "1"}}'
     cmds:
       - |
-        curl -s -X DELETE http://${API_HOST}:${API_PORT}/todos/{{.id}} \
+        curl -s -X DELETE ${API_BASE_URL}/todos/{{.id}} \
         | jq .
