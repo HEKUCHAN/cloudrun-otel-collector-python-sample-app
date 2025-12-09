@@ -24,7 +24,6 @@ def _get_version() -> str:
 
 
 def setup_tracing():
-    # リソース情報を設定してスパンのコンテキストを明確化
     resource = Resource.create(
         {
             service_attributes.SERVICE_NAME: settings.service_name,
