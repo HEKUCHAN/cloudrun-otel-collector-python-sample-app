@@ -49,6 +49,18 @@ resource "google_project_iam_member" "cloud_trace_agent_for_cloud_run_todo_app_s
   member  = "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}"
 }
 
+resource "google_project_iam_member" "monitoring_metric_writer_for_cloud_run_todo_app_sa" {
+  project = var.project_id
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}"
+}
+
+resource "google_project_iam_member" "logging_log_writer_for_cloud_run_todo_app_sa" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}"
+}
+
 
 resource "google_cloud_run_v2_service_iam_member" "public_access_todo_app_cloud_run_service" {
   project  = google_cloud_run_v2_service.todo_app_cloud_run_service.project

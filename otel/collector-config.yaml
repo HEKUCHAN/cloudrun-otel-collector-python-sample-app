@@ -2,7 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
 
 extensions:
   health_check:
@@ -18,20 +20,27 @@ processors:
     limit_percentage: 75
     spike_limit_percentage: 10
 
+  resourcedetection:
+    detectors: [gcp, env]
+    timeout: 10s
+    override: false
+
   resource:
     attributes:
       - key: service.name
         value: fastapi-todo-service
         action: upsert
       - key: service.namespace
-        value: demo  # TODO: 必要に応じて名前空間を変更
+        value: demo
         action: upsert
       - key: deployment.environment
-        value: dev   # TODO: 必要に応じて環境名を変更（dev/staging/prod等）
+        value: dev
         action: upsert
 
 exporters:
-  googlecloud: {}
+  googlecloud:
+    trace:
+      endpoint: cloudtrace.googleapis.com:443
 
   debug:
     verbosity: normal
@@ -41,15 +50,15 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, resource, batch]
+      processors: [memory_limiter, resourcedetection, resource, batch]
       exporters: [googlecloud, debug]
 
     metrics:
       receivers: [otlp]
-      processors: [memory_limiter, resource, batch]
+      processors: [memory_limiter, resourcedetection, resource, batch]
       exporters: [googlecloud, debug]
 
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, resource, batch]
+      processors: [memory_limiter, resourcedetection, resource, batch]
       exporters: [googlecloud, debug]
