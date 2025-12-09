@@ -1,9 +1,25 @@
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.semconv.resource import ResourceAttributes
 
 from app.core.config import settings
+
+
+def _get_version() -> str:
+    """pyproject.tomlからバージョンを取得"""
+    try:
+        import tomllib
+        from pathlib import Path
+
+        pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+            return data.get("project", {}).get("version", "unknown")
+    except Exception:
+        return "unknown"
 
 
 def setup_tracing():
@@ -15,7 +31,15 @@ def setup_tracing():
             insecure=settings.otel_exporter_otlp_insecure,
         )
 
-    provider = TracerProvider()
+    # リソース情報を設定してスパンのコンテキストを明確化
+    resource = Resource.create(
+        {
+            ResourceAttributes.SERVICE_NAME: settings.service_name or "fastapi-todo-service",
+            ResourceAttributes.SERVICE_VERSION: _get_version(),
+        }
+    )
+
+    provider = TracerProvider(resource=resource)
 
     if exporter:
         provider.add_span_processor(BatchSpanProcessor(exporter))
