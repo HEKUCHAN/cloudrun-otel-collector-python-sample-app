@@ -24,14 +24,6 @@ def _get_version() -> str:
 
 
 def setup_tracing():
-    exporter = None
-
-    if settings.otel_exporter_otlp_endpoint:
-        exporter = OTLPSpanExporter(
-            endpoint=settings.otel_exporter_otlp_endpoint,
-            insecure=settings.otel_exporter_otlp_insecure,
-        )
-
     # リソース情報を設定してスパンのコンテキストを明確化
     resource = Resource.create(
         {
@@ -42,7 +34,12 @@ def setup_tracing():
 
     provider = TracerProvider(resource=resource)
 
-    if exporter:
+    # OTLPエクスポーターが設定されている場合のみ追加
+    if settings.otel_exporter_otlp_endpoint:
+        exporter = OTLPSpanExporter(
+            endpoint=settings.otel_exporter_otlp_endpoint,
+            insecure=settings.otel_exporter_otlp_insecure,
+        )
         provider.add_span_processor(BatchSpanProcessor(exporter))
 
     trace.set_tracer_provider(provider)
