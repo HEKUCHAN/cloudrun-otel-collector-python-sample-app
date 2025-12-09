@@ -27,26 +27,28 @@ resource "google_secret_manager_secret_version" "otel_collector_config_version" 
   secret_data = file("${path.root}/../../otel/collector-config.yaml")
 }
 
-resource "google_secret_manager_secret_iam_binding" "otel_config_accessor_for_cloud_run_todo_app_sa" {
+resource "google_secret_manager_secret_iam_member" "otel_config_accessor_for_cloud_run_todo_app_sa" {
   project   = var.project_id
   secret_id = google_secret_manager_secret.otel_collector_config.secret_id
   role      = "roles/secretmanager.secretAccessor"
-
-  members = [
-    "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}",
+  member    = "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}"
+  depends_on = [
+    google_service_account.cloud_run_todo_app_sa,
   ]
-
-  depends_on = [google_secret_manager_secret.otel_collector_config]
 }
 
-resource "google_project_iam_binding" "artifact_registry_reader_for_cloud_run_todo_app_sa" {
+resource "google_project_iam_member" "artifact_registry_reader_for_cloud_run_todo_app_sa" {
   project = var.project_id
   role    = "roles/artifactregistry.reader"
-
-  members = [
-    "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}",
-  ]
+  member  = "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}"
 }
+
+resource "google_project_iam_member" "cloud_trace_agent_for_cloud_run_todo_app_sa" {
+  project = var.project_id
+  role    = "roles/cloudtrace.agent"
+  member  = "serviceAccount:${google_service_account.cloud_run_todo_app_sa.email}"
+}
+
 
 resource "google_cloud_run_v2_service_iam_member" "public_access_todo_app_cloud_run_service" {
   project  = google_cloud_run_v2_service.todo_app_cloud_run_service.project

@@ -80,6 +80,26 @@ cd infra/terraform
 terraform apply
 ```
 
+## 7. 動作確認
+
+デプロイが完了したら、Cloud Run のエンドポイントに対して実際にリクエストを送り、アプリケーションと Collector が動いているか確認します。
+
+Trace やログは GCP コンソールから確認できます。
+
+```text
+Cloud Trace:
+  https://console.cloud.google.com/traces/list
+
+Cloud Logging:
+  https://console.cloud.google.com/logs/query
+
+Cloud Monitoring:
+  https://console.cloud.google.com/monitoring
+```
+
+FastAPI 側で OTEL SDK を有効にしていれば、リクエストに応じたトレースが Cloud Trace 上に表示されます。
+
+
 ## イメージの更新
 
 アプリケーションコードを変更した場合:
