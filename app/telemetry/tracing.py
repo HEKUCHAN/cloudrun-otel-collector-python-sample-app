@@ -33,7 +33,8 @@ def setup_tracing():
 
     provider = TracerProvider(resource=resource)
 
-    # OTLPエクスポーターが設定されている場合のみ追加
+    trace.set_tracer_provider(provider)
+
     if settings.otel_exporter_otlp_endpoint:
         exporter = OTLPSpanExporter(
             endpoint=settings.otel_exporter_otlp_endpoint,
@@ -41,4 +42,3 @@ def setup_tracing():
         )
         provider.add_span_processor(BatchSpanProcessor(exporter))
 
-    trace.set_tracer_provider(provider)
