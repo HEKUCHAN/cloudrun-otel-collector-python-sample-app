@@ -7,10 +7,10 @@ from app.telemetry.instrumentation import setup_instrument
 from app.telemetry.tracing import setup_tracing
 
 setup_logging(settings.log_level)
-setup_tracing()
 
 app = FastAPI()
 
 app.include_router(todo_router, prefix="/todos", tags=["todos"])
 
+setup_tracing()
 setup_instrument(app)
