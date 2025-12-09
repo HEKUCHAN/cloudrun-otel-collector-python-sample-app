@@ -35,7 +35,7 @@ def setup_tracing():
     # リソース情報を設定してスパンのコンテキストを明確化
     resource = Resource.create(
         {
-            service_attributes.SERVICE_NAME: settings.service_name or "fastapi-todo-service",
+            service_attributes.SERVICE_NAME: settings.service_name,
             service_attributes.SERVICE_VERSION: _get_version(),
         }
     )

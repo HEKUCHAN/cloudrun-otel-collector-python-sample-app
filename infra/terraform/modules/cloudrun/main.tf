@@ -71,6 +71,7 @@ resource "google_cloud_run_v2_service" "todo_app_cloud_run_service" {
     annotations = {
       "run.googleapis.com/container-dependencies" = "{app:[collector]}"
       "run.googleapis.com/execution-environment"  = "gen2"
+      "app.gcp-terraform.io/deploy-timestamp"     = timestamp()
     }
 
     labels = {

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     # WARNING: 本番環境ではセキュリティ設定を検討する必要があります
     otel_exporter_otlp_insecure: bool = False
 
+    service_name: str = "fastapi-todo-service"
     log_level: str = "INFO"
     environment: str = "dev"
     api_host: str = "localhost"
