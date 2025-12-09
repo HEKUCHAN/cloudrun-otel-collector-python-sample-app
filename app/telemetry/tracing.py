@@ -22,8 +22,7 @@ def _get_version() -> str:
     except Exception:
         return "unknown"
 
-
-def setup_tracing():
+def setup_tracing() -> Resource:
     resource = Resource.create(
         {
             service_attributes.SERVICE_NAME: settings.service_name,
@@ -42,3 +41,4 @@ def setup_tracing():
         )
         provider.add_span_processor(BatchSpanProcessor(exporter))
 
+    return resource
