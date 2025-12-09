@@ -10,6 +10,7 @@ setup_logging(settings.log_level)
 setup_tracing()
 
 app = FastAPI()
-setup_instrument(app)
 
 app.include_router(todo_router, prefix="/todos", tags=["todos"])
+
+setup_instrument(app)
